@@ -78,3 +78,46 @@ export async function createNewFile(name: string) {
 export async function switchFile(id: string) {
   currentFileId.set(id);
 }
+
+export async function deleteFileAndSwitch(id: string) {
+  const currentFiles = get(files);
+  if (currentFiles.length <= 1) return; // Don't delete the last file
+  
+  await deleteFile(id);
+  files.update(fs => fs.filter(f => f.id !== id));
+  
+  const activeId = get(currentFileId);
+  if (activeId === id) {
+    const remaining = get(files);
+    currentFileId.set(remaining[0].id);
+  }
+}
+
+export async function renameFileEntry(id: string, newName: string) {
+  let newId = newName;
+  if (!newId.endsWith('.lean')) {
+    newId += '.lean';
+    newName += '.lean';
+  }
+
+  const currentFiles = get(files);
+  if (currentFiles.find(f => f.id === newId && f.id !== id)) {
+    alert('File already exists with this name!');
+    return;
+  }
+
+  const fileToRename = currentFiles.find(f => f.id === id);
+  if (fileToRename) {
+    const updatedFile = { ...fileToRename, id: newId, name: newName, lastModified: Date.now() };
+    
+    // In IndexedDB, changing the key requires delete + put
+    await deleteFile(id);
+    await saveFile(updatedFile);
+    
+    files.update(fs => fs.map(f => f.id === id ? updatedFile : f));
+    
+    if (get(currentFileId) === id) {
+      currentFileId.set(newId);
+    }
+  }
+}

@@ -3,13 +3,17 @@
   import Editor from './lib/Editor.svelte';
   import SettingsModal from './lib/SettingsModal.svelte';
   import CopilotChat from './lib/CopilotChat.svelte';
-  import { files, currentFileId, initFiles, updateCurrentFileContent, createNewFile, switchFile } from './lib/stores/files';
-  import { diagnostics, tacticState, initLeanWorker, checkLeanCode } from './lib/stores/lean';
+  import FileExplorer from './lib/FileExplorer.svelte';
+  import { files, currentFileId, initFiles, updateCurrentFileContent } from './lib/stores/files';
+  import { diagnostics, tacticState, isVerifying, initLeanWorker, checkLeanCode, runFullVerification } from './lib/stores/lean';
   import { initSettings } from './lib/stores/settings';
   import { initTelemetry } from './lib/stores/telemetry';
 
-  let leftWidth = 66.66; // Initial width in percentage
-  let isResizing = false;
+  let leftWidth = 20; // Explorer width
+  let centerWidth = 50; // Editor width
+  
+  let isResizingExplorer = false;
+  let isResizingEditor = false;
   let currentCursorLine = 1;
   let showSettings = false;
 
@@ -25,7 +29,7 @@
 
   // Trigger lean worker check when content or cursor changes
   $: {
-    if (activeContent !== undefined) {
+    if (activeContent !== undefined && !$isVerifying) {
       checkLeanCode(activeContent, currentCursorLine);
     }
   }
@@ -40,27 +44,37 @@
     currentCursorLine = line;
   }
 
-  function handleNewFile() {
-    const name = prompt('New file name (e.g. Logic.lean):');
-    if (name) {
-      createNewFile(name);
-    }
+  function startResizeExplorer() {
+    isResizingExplorer = true;
   }
 
-  function startResize() {
-    isResizing = true;
+  function startResizeEditor() {
+    isResizingEditor = true;
   }
 
   function doResize(event: MouseEvent) {
-    if (!isResizing) return;
-    const newWidth = (event.clientX / window.innerWidth) * 100;
-    if (newWidth > 20 && newWidth < 80) { // Limit min/max widths
-      leftWidth = newWidth;
+    if (isResizingExplorer) {
+      const newWidth = (event.clientX / window.innerWidth) * 100;
+      if (newWidth > 10 && newWidth < 40) {
+        leftWidth = newWidth;
+      }
+    } else if (isResizingEditor) {
+      const newWidth = ((event.clientX / window.innerWidth) * 100) - leftWidth;
+      if (newWidth > 20 && newWidth < 70) {
+        centerWidth = newWidth;
+      }
     }
   }
 
   function stopResize() {
-    isResizing = false;
+    isResizingExplorer = false;
+    isResizingEditor = false;
+  }
+
+  function compileFull() {
+    if (activeContent) {
+      runFullVerification(activeContent);
+    }
   }
 </script>
 
@@ -72,27 +86,31 @@
 
 <SettingsModal bind:show={showSettings} />
 
-<main class="h-screen w-screen flex flex-row bg-cyber-darker text-cyber-text overflow-hidden" class:cursor-col-resize={isResizing}>
+<main class="h-screen w-screen flex flex-row bg-cyber-darker text-cyber-text overflow-hidden" class:cursor-col-resize={isResizingExplorer || isResizingEditor}>
   
+  <!-- Left Panel: File Explorer -->
+  <section style="width: {leftWidth}%" class="h-full relative min-w-0">
+    <FileExplorer />
+  </section>
+
+  <!-- Resizer Handle 1 -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div 
+    class="w-1 cursor-col-resize bg-cyber-dark hover:bg-cyber-glow transition-colors z-10 flex-shrink-0"
+    on:mousedown={startResizeExplorer}
+  ></div>
+
   <!-- Central Panel: Editor -->
-  <section style="width: {leftWidth}%" class="h-full relative flex flex-col min-w-0">
-    <!-- File Tabs -->
-    <div class="flex flex-row bg-cyber-dark overflow-x-auto border-b border-gray-800">
-      {#each $files as file}
-        <button 
-          class="px-4 py-2 text-sm font-mono whitespace-nowrap border-r border-gray-800 transition-colors
-                 {file.id === $currentFileId ? 'bg-cyber-darker text-cyber-accent border-t-2 border-t-cyber-accent' : 'text-gray-500 hover:text-gray-300'}"
-          on:click={() => switchFile(file.id)}
-        >
-          {file.name}
-        </button>
-      {/each}
+  <section style="width: {centerWidth}%" class="h-full relative flex flex-col min-w-0">
+    <!-- Active File Header -->
+    <div class="bg-cyber-dark px-4 py-2 text-sm font-mono border-b border-gray-800 text-cyber-accent flex justify-between items-center">
+      <span>{currentFile ? currentFile.name : 'No file'}</span>
       <button 
-        class="px-3 py-2 text-gray-500 hover:text-cyber-glow transition-colors"
-        on:click={handleNewFile}
-        title="New File"
+        class="bg-cyber-accent text-cyber-darker px-3 py-1 rounded hover:bg-cyber-accentHover disabled:opacity-50 transition-colors font-bold text-xs"
+        on:click={compileFull}
+        disabled={$isVerifying || !currentFile}
       >
-        +
+        {$isVerifying ? 'Compiling...' : 'Verify (Full WASM)'}
       </button>
     </div>
 
@@ -111,15 +129,15 @@
     </div>
   </section>
 
-  <!-- Resizer Handle -->
+  <!-- Resizer Handle 2 -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class="w-1 cursor-col-resize bg-cyber-dark hover:bg-cyber-glow transition-colors z-10 flex-shrink-0"
-    on:mousedown={startResize}
+    on:mousedown={startResizeEditor}
   ></div>
 
   <!-- Right Panel: InfoView and AI Chat -->
-  <aside style="width: {100 - leftWidth}%" class="flex flex-col h-full bg-cyber-dark min-w-0">
+  <aside style="width: {100 - leftWidth - centerWidth}%" class="flex flex-col h-full bg-cyber-dark min-w-0">
     <!-- Top Right: InfoView -->
     <section class="flex-1 border-b border-cyber-darker overflow-auto p-4 flex flex-col">
       <h2 class="text-cyber-glow font-bold mb-2 uppercase tracking-wider text-xs flex justify-between">
