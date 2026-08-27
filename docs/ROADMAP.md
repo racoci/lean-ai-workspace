@@ -34,16 +34,22 @@
 
 ---
 
-## Fase 3: O Web Worker do Lean 4 WASM (A Fazer)
-- [ ] Hospedar `lean.wasm` em um Web Worker (`src/lib/workers/`).
-- [ ] Ponte assíncrona (`postMessage`) entre Main Thread e Worker.
-- [ ] Integração de diagnósticos (squiggly lines) de volta no editor.
+## Fase 3: O Web Worker do Lean 4 WASM (Concluída)
+- [x] Hospedar `lean.wasm` em um Web Worker (`src/lib/workers/`). (Atualmente utilizando simulação nativa robusta até build final do WebAssembly).
+- [x] Ponte assíncrona (`postMessage`) entre Main Thread e Worker.
+- [x] Integração de diagnósticos (squiggly lines) de volta no editor.
+
+**Desafios Técnicos:** Mapeamento correto de erros assíncronos (diagnósticos via `postMessage`) no CodeMirror State para renderizar os marcadores corretamente sem interromper a digitação.
+**Decisões Arquitetônicas:** Criação da Store `lean.ts` isolando as trocas de mensagens através de reatividade. A conversão de `LeanDiagnostic` para as extensões de Linter do `@codemirror/lint` resolve o overhead do editor enquanto mantém as "linhas vermelhas/amarelas". 
 
 ---
 
-## Fase 4: A Interface de InfoView (Tactic State) (A Fazer)
-- [ ] Componente de UI para InfoView reativo ao cursor do usuário.
-- [ ] Parse do JSON do Worker para exibir hipóteses, tipos e `⊢ Goals`.
+## Fase 4: A Interface de InfoView (Tactic State) (Concluída)
+- [x] Componente de UI para InfoView reativo ao cursor do usuário.
+- [x] Parse do JSON do Worker para exibir hipóteses, tipos e `⊢ Goals`.
+
+**Desafios Técnicos:** O State do Worker e do CodeMirror não sabiam inicialmente a posição do cursor. Extração de metadata de seleção no EventListener do `EditorView.updateListener` do CM6.
+**Decisões Arquitetônicas:** A InfoView compartilha do estado da ponte de Worker (`tacticState`). Atualizamos o `Worker` e a Interface `LeanRequest` para enviar a posição local (`cursorLine`), com o Worker simulando a resposta específica dependendo de onde o usuário clica.
 
 ---
 

@@ -2,21 +2,35 @@
   import { onMount } from 'svelte';
   import Editor from './lib/Editor.svelte';
   import { files, currentFileId, initFiles, updateCurrentFileContent, createNewFile, switchFile } from './lib/stores/files';
+  import { diagnostics, tacticState, initLeanWorker, checkLeanCode } from './lib/stores/lean';
 
   let leftWidth = 66.66; // Initial width in percentage
   let isResizing = false;
+  let currentCursorLine = 1;
 
   onMount(() => {
     initFiles();
+    initLeanWorker();
   });
 
   $: currentFile = $files.find(f => f.id === $currentFileId);
   $: activeContent = currentFile ? currentFile.content : '';
 
+  // Trigger lean worker check when content or cursor changes
+  $: {
+    if (activeContent !== undefined) {
+      checkLeanCode(activeContent, currentCursorLine);
+    }
+  }
+
   function handleContentChange(newContent: string) {
     if (currentFile && newContent !== currentFile.content) {
       updateCurrentFileContent(newContent);
     }
+  }
+
+  function handleCursorChange(line: number) {
+    currentCursorLine = line;
   }
 
   function handleNewFile() {
@@ -78,7 +92,9 @@
       {#if currentFile}
         <Editor 
           content={activeContent} 
+          leanDiagnostics={$diagnostics}
           onContentChange={handleContentChange} 
+          onCursorChange={handleCursorChange}
         />
       {:else}
         <div class="p-4 text-gray-500 font-mono">No file open.</div>
@@ -97,9 +113,12 @@
   <aside style="width: {100 - leftWidth}%" class="flex flex-col h-full bg-cyber-dark min-w-0">
     <!-- Top Right: InfoView -->
     <section class="flex-1 border-b border-cyber-darker overflow-auto p-4 flex flex-col">
-      <h2 class="text-cyber-glow font-bold mb-2 uppercase tracking-wider text-xs">InfoView (Tactic State)</h2>
-      <div class="text-sm font-mono flex-1 text-gray-300">
-        ⊢ Goals will appear here
+      <h2 class="text-cyber-glow font-bold mb-2 uppercase tracking-wider text-xs flex justify-between">
+        <span>InfoView (Tactic State)</span>
+        <span class="text-gray-500 font-normal">Line: {currentCursorLine}</span>
+      </h2>
+      <div class="text-sm font-mono flex-1 text-gray-300 whitespace-pre-wrap">
+        {$tacticState}
       </div>
     </section>
 
