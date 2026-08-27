@@ -14,10 +14,13 @@
 
 ---
 
-## Fase 1: Implementação do Editor Base e Layout (A Fazer)
-- [ ] Integrar **Monaco Editor** ou **CodeMirror 6** na thread UI principal no Painel Central.
-- [ ] Implementar highlight de sintaxe básico.
-- [ ] Funcionalidade de redimensionamento dinâmico dos painéis.
+## Fase 1: Implementação do Editor Base e Layout (Concluída)
+- [x] Integrar **CodeMirror 6** (substituindo Monaco por leveza Zero-Infra) na thread UI principal no Painel Central.
+- [x] Implementar highlight de sintaxe básico (StreamLanguage para Lean).
+- [x] Funcionalidade de redimensionamento dinâmico dos painéis (Split-Pane handle).
+
+**Desafios Técnicos:** Monaco é pesado e muitas vezes traz dependências de infra/assets extras. CodeMirror 6 foi escolhido por ser perfeitamente modular e fácil de integrar no ecosistema Vite/Svelte para 100% Client-Side.
+**Decisões Arquitetônicas:** Criado um analisador simples de tokens (keywords, comments) usando `@codemirror/language` `StreamLanguage` para dar feedback visual instantâneo aos comandos do Lean 4. Adicionados listeners globais de mouse para redimensionamento suave e performático via variáveis Svelte reativas interpoladas no style `width`.
 
 ---
 
