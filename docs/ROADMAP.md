@@ -53,8 +53,11 @@
 
 ---
 
-## Fase 5: Telemetria BYOK (Quotas) e AI Co-Pilot (A Fazer)
-- [ ] Modal de configuração BYOK (Bring Your Own Key) para APIs de IA.
-- [ ] Svelte Stores de Telemetria salvos no IndexedDB para token counting.
-- [ ] Chat Co-Pilot consumindo contexto ativo (código + InfoView).
-- [ ] Ações rápidas (ex: Aplicar Sugestão, Explicar Erro).
+## Fase 5: Telemetria BYOK (Quotas) e AI Co-Pilot (Concluída)
+- [x] Modal de configuração BYOK (Bring Your Own Key) para APIs de IA.
+- [x] Svelte Stores de Telemetria salvos no IndexedDB para token counting.
+- [x] Chat Co-Pilot consumindo contexto ativo (código + InfoView).
+- [x] Fetch direto do navegador (Zero-Infra).
+
+**Desafios Técnicos:** Enviar os prompts do LLM diretamente do browser sem backend, garantindo que o rate-limit fosse respeitado sem expor chaves (armazenamento seguro via IndexedDB).
+**Decisões Arquitetônicas:** A `SettingsModal` injeta a chave da API na camada local sem sincronização remota, permitindo que a `askCopilot` chame as APIs REST (Gemini e OpenAI) construindo dinamicamente o contexto incluindo o estado completo do `Editor` e o `Tactic State` atual. A métrica foi agregada via Svelte Stores, alimentando a persistência com cada nova requisição, controlando "tokens estimados" com fallback visual no front-end.

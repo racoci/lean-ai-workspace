@@ -1,15 +1,22 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Editor from './lib/Editor.svelte';
+  import SettingsModal from './lib/SettingsModal.svelte';
+  import CopilotChat from './lib/CopilotChat.svelte';
   import { files, currentFileId, initFiles, updateCurrentFileContent, createNewFile, switchFile } from './lib/stores/files';
   import { diagnostics, tacticState, initLeanWorker, checkLeanCode } from './lib/stores/lean';
+  import { initSettings } from './lib/stores/settings';
+  import { initTelemetry } from './lib/stores/telemetry';
 
   let leftWidth = 66.66; // Initial width in percentage
   let isResizing = false;
   let currentCursorLine = 1;
+  let showSettings = false;
 
-  onMount(() => {
-    initFiles();
+  onMount(async () => {
+    await initSettings();
+    await initTelemetry();
+    await initFiles();
     initLeanWorker();
   });
 
@@ -62,6 +69,8 @@
   on:mouseup={stopResize} 
   on:mouseleave={stopResize} 
 />
+
+<SettingsModal bind:show={showSettings} />
 
 <main class="h-screen w-screen flex flex-row bg-cyber-darker text-cyber-text overflow-hidden" class:cursor-col-resize={isResizing}>
   
@@ -123,18 +132,16 @@
     </section>
 
     <!-- Bottom Right: AI Co-Pilot Chat -->
-    <section class="flex-1 overflow-auto p-4 flex flex-col">
-      <h2 class="text-cyber-accent font-bold mb-2 uppercase tracking-wider text-xs">AI Co-Pilot</h2>
-      <div class="flex-1 overflow-y-auto mb-3 text-sm text-gray-400 font-mono">
-        > Co-Pilot initialized. Ready to assist with proofs.
+    <section class="flex-1 overflow-hidden p-4 flex flex-col">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-cyber-accent font-bold uppercase tracking-wider text-xs">AI Co-Pilot</h2>
+        <button on:click={() => showSettings = true} class="text-gray-500 hover:text-cyber-glow text-xs border border-gray-700 px-2 py-1 rounded transition-colors">⚙️ Settings</button>
       </div>
-      <div class="mt-auto">
-        <input 
-          type="text" 
-          placeholder="Ask the AI for a tactic or explanation..." 
-          class="w-full p-2 bg-cyber-darker border border-gray-700 rounded text-cyber-text text-sm focus:outline-none focus:border-cyber-glow font-mono transition-colors"
-        />
-      </div>
+      
+      <CopilotChat 
+        currentCode={activeContent}
+        currentTacticState={$tacticState}
+      />
     </section>
   </aside>
 </main>
