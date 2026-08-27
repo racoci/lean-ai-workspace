@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cyber-darker text-cyber-text m-0 p-0 h-screen w-screen overflow-hidden font-sans;
+  }
+}
