@@ -24,10 +24,13 @@
 
 ---
 
-## Fase 2: Infraestrutura Local-First (IndexedDB) (A Fazer)
-- [ ] Módulo nativo de IndexedDB em `src/lib/utils/indexedDB.ts`.
-- [ ] Auto-Save do texto do editor.
-- [ ] Sistema de "Abas de Arquivos" e árvore de arquivos persistidos localmente.
+## Fase 2: Infraestrutura Local-First (IndexedDB) (Concluída)
+- [x] Módulo nativo de IndexedDB em `src/lib/utils/indexedDB.ts`.
+- [x] Auto-Save do texto do editor.
+- [x] Sistema de "Abas de Arquivos" e árvore de arquivos persistidos localmente.
+
+**Desafios Técnicos:** O estado do editor CodeMirror e o estado Svelte podem ciclar se não gerenciados corretamente, por isso a atualização `internalContent` previne atualizações recursivas.
+**Decisões Arquitetônicas:** O IndexedDB nativo foi adotado em `src/lib/utils/indexedDB.ts` sem bibliotecas de terceiros para minimizar o tamanho final do bundle. O estado Svelte (stores) é utilizado para reagir à mudança de arquivos e auto-salvamento debounced (`setTimeout`), garantindo persistência "Local-First" do código-fonte sem necessitar de backend.
 
 ---
 

@@ -1,9 +1,30 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import Editor from './lib/Editor.svelte';
+  import { files, currentFileId, initFiles, updateCurrentFileContent, createNewFile, switchFile } from './lib/stores/files';
 
-  let initialCode = `-- Welcome to Lean AI Workspace\n\n#eval "Hello, world!"\n\ndef myTheorem : 1 + 1 = 2 := rfl\n`;
   let leftWidth = 66.66; // Initial width in percentage
   let isResizing = false;
+
+  onMount(() => {
+    initFiles();
+  });
+
+  $: currentFile = $files.find(f => f.id === $currentFileId);
+  $: activeContent = currentFile ? currentFile.content : '';
+
+  function handleContentChange(newContent: string) {
+    if (currentFile && newContent !== currentFile.content) {
+      updateCurrentFileContent(newContent);
+    }
+  }
+
+  function handleNewFile() {
+    const name = prompt('New file name (e.g. Logic.lean):');
+    if (name) {
+      createNewFile(name);
+    }
+  }
 
   function startResize() {
     isResizing = true;
@@ -32,7 +53,37 @@
   
   <!-- Central Panel: Editor -->
   <section style="width: {leftWidth}%" class="h-full relative flex flex-col min-w-0">
-    <Editor bind:content={initialCode} />
+    <!-- File Tabs -->
+    <div class="flex flex-row bg-cyber-dark overflow-x-auto border-b border-gray-800">
+      {#each $files as file}
+        <button 
+          class="px-4 py-2 text-sm font-mono whitespace-nowrap border-r border-gray-800 transition-colors
+                 {file.id === $currentFileId ? 'bg-cyber-darker text-cyber-accent border-t-2 border-t-cyber-accent' : 'text-gray-500 hover:text-gray-300'}"
+          on:click={() => switchFile(file.id)}
+        >
+          {file.name}
+        </button>
+      {/each}
+      <button 
+        class="px-3 py-2 text-gray-500 hover:text-cyber-glow transition-colors"
+        on:click={handleNewFile}
+        title="New File"
+      >
+        +
+      </button>
+    </div>
+
+    <!-- Editor Workspace -->
+    <div class="flex-1 relative">
+      {#if currentFile}
+        <Editor 
+          content={activeContent} 
+          onContentChange={handleContentChange} 
+        />
+      {:else}
+        <div class="p-4 text-gray-500 font-mono">No file open.</div>
+      {/if}
+    </div>
   </section>
 
   <!-- Resizer Handle -->

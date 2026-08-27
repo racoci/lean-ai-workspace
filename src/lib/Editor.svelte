@@ -7,9 +7,11 @@
   import { StreamLanguage } from '@codemirror/language';
 
   export let content = '';
+  export let onContentChange: (newContent: string) => void = () => {};
   
   let editorContainer: HTMLDivElement;
   let editorView: EditorView;
+  let internalContent = content; // prevent cyclic updates
 
   // Basic syntax highlighting for Lean (using a simple stream language definition)
   const simpleLean = StreamLanguage.define({
@@ -41,7 +43,9 @@
         simpleLean,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
-            content = update.state.doc.toString();
+            const newContent = update.state.doc.toString();
+            internalContent = newContent;
+            onContentChange(newContent);
           }
         }),
       ],
@@ -59,8 +63,9 @@
     }
   });
 
-  // Watch for external content changes
-  $: if (editorView && content !== editorView.state.doc.toString()) {
+  // Watch for external content changes (e.g. switching tabs)
+  $: if (editorView && content !== internalContent) {
+    internalContent = content;
     editorView.dispatch({
       changes: {
         from: 0,
