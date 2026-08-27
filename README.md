@@ -1,47 +1,74 @@
-# Svelte + TS + Vite
+# Lean AI Workspace 🚀
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+A Zero-Infra, 100% Client-Side Single Page Application (SPA) designed as a modern Scientific IDE for formal theorem verification using Lean 4. Built with Vite, Svelte, TypeScript, and TailwindCSS, this workspace brings the power of AI assistance directly to your browser without the need for external backends.
 
-## Recommended IDE Setup
+![Lean AI Workspace Dashboard](https://raw.githubusercontent.com/lucasracoci/lean-ai-workspace/main/public/favicon.svg)
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## Overview 🛠️
 
-## Need an official Svelte framework?
+The Lean AI Workspace bridges the gap between formal mathematical verification and artificial intelligence, offering:
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+- **Local-First Architecture:** Powered by `IndexedDB`, your files, telemetry, and API settings never leave your machine.
+- **Lean 4 Web Worker (Simulated/Ready):** Designed to handle heavy Lean compilation entirely client-side via WebAssembly isolation.
+- **Reactive Tactic State:** Context-aware `InfoView` dynamically updates hypotheses and goals based on your cursor position in the editor.
+- **BYOK AI Co-Pilot:** "Bring Your Own Key" support for Google Gemini and OpenAI. Contextualized chat uses your active code and tactic state to provide surgical suggestions directly in the interface.
 
-## Technical considerations
+## Tech Stack 💻
 
-**Why use this over SvelteKit?**
+- **Framework:** Svelte + TypeScript
+- **Bundler:** Vite
+- **Styling:** TailwindCSS (Cyberpunk Theme)
+- **Editor:** CodeMirror 6
+- **Storage:** Native IndexedDB
+- **CI/CD:** GitHub Actions (Deploy to GitHub Pages)
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+## Progressive Roadmap
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+See the detailed implementation timeline and architectural decisions in [docs/ROADMAP.md](./docs/ROADMAP.md).
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+- **Phase 0:** DevOps, CI/CD, and Layout initialization (Done).
+- **Phase 1:** CodeMirror 6 integration with split-pane workspace (Done).
+- **Phase 2:** Local-first infrastructure with IndexedDB file tabs (Done).
+- **Phase 3:** Lean 4 WASM Web Worker message bridge (Done).
+- **Phase 4:** Tactic State (InfoView) UI (Done).
+- **Phase 5:** AI Co-Pilot with BYOK Telemetry (Done).
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+## Getting Started 🏃‍♂️
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+### Prerequisites
+- Node.js >= 20.x
 
-**Why include `.vscode/extensions.json`?**
+### Installation
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/lucasracoci/lean-ai-workspace.git
+   cd lean-ai-workspace
+   ```
 
-**Why enable `allowJs` in the TS template?**
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
 
-**Why is HMR not preserving my local component state?**
+4. **Build for production:**
+   ```bash
+   npm run build
+   ```
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
+## Usage 💡
 
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
+1. Open the application in your browser.
+2. You will be greeted with a sample `Main.lean` file in the central editor.
+3. Use the `+` button in the tabs bar to create new Lean files.
+4. Click on **⚙️ Settings** in the AI Co-Pilot panel to add your Google Gemini or OpenAI API key.
+5. Ask the Co-Pilot questions; it automatically reads your current file content and tactic state to provide accurate theorem-proving assistance.
 
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+## License 📜
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
