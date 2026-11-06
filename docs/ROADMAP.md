@@ -61,3 +61,14 @@
 
 **Desafios Técnicos:** Enviar os prompts do LLM diretamente do browser sem backend, garantindo que o rate-limit fosse respeitado sem expor chaves (armazenamento seguro via IndexedDB).
 **Decisões Arquitetônicas:** A `SettingsModal` injeta a chave da API na camada local sem sincronização remota, permitindo que a `askCopilot` chame as APIs REST (Gemini e OpenAI) construindo dinamicamente o contexto incluindo o estado completo do `Editor` e o `Tactic State` atual. A métrica foi agregada via Svelte Stores, alimentando a persistência com cada nova requisição, controlando "tokens estimados" com fallback visual no front-end.
+
+---
+
+## Track 2: IDE Enhancements (`lean-ide-enhancements_20261106`) (Em Planejamento / Execução)
+- [ ] Fase 1: Test Suite Setup (Vitest) & Atalhos Unicode no CodeMirror (`\forall ` -> `∀ `).
+- [ ] Fase 2: Visualizador Estruturado em Cards no InfoView (Interactive Goal Tree).
+- [ ] Fase 3: Indicador Granular de Progresso de Download do WASM (Lean4.js).
+- [ ] Fase 4: Assistente de Provas com IA e Diff Preview ("Solve with AI").
+- [ ] Fase 5: Exportação/Importação Zip e Compartilhamento de Provas via Hash URL.
+- [ ] Fase 6: Mitigação de Riscos de Memória e Storage Limits.
+
